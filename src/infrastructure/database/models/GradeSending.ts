@@ -1,5 +1,8 @@
 import {DataTypes, Model} from "sequelize";
 import {sequelize} from "../sequelize";
+import {GradeReceiverSequelize} from "./GradeReceiver";
+import {InstitutionSequelize} from "./Institution";
+import {ProcessStatusSequelize} from "./ProcessStatus";
 
 interface GradeSendingRow {
     id: number,
@@ -14,6 +17,9 @@ interface GradeSendingRow {
     scoreToAssign: number,
     dateToGrade: string,
     itemNumber: number,
+    gradeReceiverId: number,
+    institutionId: number,
+    processStatusId: number,
     createdAt?: Date,
     updatedAt?: Date
 }
@@ -31,6 +37,9 @@ export class GradeSendingSequelize extends Model<GradeSendingRow,Omit<GradeSendi
     declare scoreToAssign: number
     declare dateToGrade: string
     declare itemNumber: number
+    declare gradeReceiverId: number
+    declare institutionId: number
+    declare processStatusId: number
     declare readonly createdAt: Date
     declare readonly updatedAt: Date
 }
@@ -43,7 +52,7 @@ GradeSendingSequelize.init({
         autoIncrement: true
     },
     uuid:{
-        type: DataTypes.UUIDV4,
+        type: DataTypes.UUID,
         allowNull:false
     },
     userId:{
@@ -85,9 +94,37 @@ GradeSendingSequelize.init({
     itemNumber:{
         type: DataTypes.INTEGER,
         allowNull:false
+    },
+    gradeReceiverId:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: GradeReceiverSequelize,
+            key: 'id'
+        }
+    },
+    institutionId:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: InstitutionSequelize,
+            key: 'id'
+        }
+    },
+    processStatusId:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: ProcessStatusSequelize,
+            key: 'id'
+        }
     }
 },{
     sequelize,
     timestamps:true,
     tableName:'grade_sending'
 })
+
+GradeSendingSequelize.belongsTo(GradeReceiverSequelize,{foreignKey:'gradeReceiverId',as:'gradeReceiver'})
+GradeSendingSequelize.belongsTo(InstitutionSequelize,{foreignKey:'institutionId',as:'institution'})
+GradeSendingSequelize.belongsTo(ProcessStatusSequelize,{foreignKey:'processStatusId',as:'processStatus'})

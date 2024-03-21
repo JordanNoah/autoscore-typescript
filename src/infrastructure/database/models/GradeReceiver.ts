@@ -31,7 +31,7 @@ GradeReceiverSequelize.init({
         autoIncrement: true
     },
     uuid:{
-        type: DataTypes.UUIDV4,
+        type: DataTypes.UUID,
         allowNull:false
     },
     firedAt:{
