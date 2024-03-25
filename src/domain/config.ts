@@ -18,4 +18,7 @@ export default {
     DB_PASSWORD:process.env.DB_PASSWORD || '',
     DB_PORT:process.env.DB_PORT || '',
     DB_NAME:process.env.DB_NAME || '',
+    CRONJOB_AUTOSCORE:process.env.CRONJOB_AUTOSCORE || '5 * * * * *',
+    CRONJOB_CLEANER:process.env.CRONJOB_CLEANER || '5 * * * * *',
+    CRONJOB_USER_NOT_FOUND:process.env.CRONJOB_USER_NOT_FOUND || '5 * * * * *'
 }

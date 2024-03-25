@@ -54,12 +54,12 @@ export class Rabbitmq {
             if (eventProcessor){
                 await eventProcessor(JSON.parse(msg.content))
             } else {
-                this._channel.ack(msg)
                 console.error(`Event not found: ${msg.properties.type}`);
             }
         }else{
             console.log(message);
         }
+        this._channel.ack(msg)
     }
 
     private static middleware(msg: EventDto): [string?, boolean?] {

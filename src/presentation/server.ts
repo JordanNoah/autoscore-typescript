@@ -2,6 +2,7 @@ import express, {Router} from 'express'
 import * as http from "http";
 import {DbSequelize} from "../infrastructure/database/init";
 import {Rabbitmq} from "../infrastructure/eventbus/rabbitmq";
+import {Cron} from "../infrastructure/cron";
 
 interface Options {
     port: number,
@@ -22,6 +23,9 @@ export class Server {
     public start() {
         DbSequelize().then(async ()=> {
             await Rabbitmq.init()
+            new Cron().userNotFound()
+            new Cron().processWaitingToSend()
+            new Cron().cleaner()
             this.app.use(express.json())
             this.app.use(this.routes)
             const server = http.createServer(this.app)

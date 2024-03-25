@@ -41,35 +41,35 @@ InstitutionSequelize.init({
         autoIncrement: true
     },
     uuid:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
     },
     name:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
     },
     fullName:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
     },
     abbreviation:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
     },
     domain:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
     },
     website:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
     },
     restPath:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
     },
     modality:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
     },
     translations:{
@@ -77,7 +77,7 @@ InstitutionSequelize.init({
         allowNull: false
     },
     token:{
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
     }
 },{

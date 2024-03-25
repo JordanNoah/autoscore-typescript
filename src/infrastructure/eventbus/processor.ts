@@ -2,15 +2,18 @@ import {GradeReceiverRegisterDto} from "../../domain/dtos/gradeReceiver.register
 import {GradeReceiverDatasourceImpl} from "../datasources/gradeReceiver.datasource.impl";
 import {ProcessStatusDatasourceImpl} from "../datasources/processStatus.datasource.impl";
 import {InstitutionDatasourceImpl} from "../datasources/institution.datasource.impl";
+import {GradeSendingDatasourceImpl} from "../datasources/gradeSending.datasource.impl";
 
 export class Processor {
     public static async activityCompleted(content: object) {
         const [errorGradeReceiverDto, gradeReceiverDto] = GradeReceiverRegisterDto.create(content)
-        const gradeReceiver = await new GradeReceiverDatasourceImpl().register(gradeReceiverDto!)
-        const processStatusInProcess = await new ProcessStatusDatasourceImpl().getByAbbreviation('WAITING_TO_SEND')
-        if (!processStatusInProcess) console.log("Process status not found")
-        const institution = await new InstitutionDatasourceImpl().getByInstitutionAbbreviationAndModality(gradeReceiver.institutionAbbreviation,gradeReceiver.modality)
-        if (!institution) console.log("Institution not found")
-        console.log(gradeReceiver)
+        const gradeReceiverEntity = await new GradeReceiverDatasourceImpl().register(gradeReceiverDto!)
+        const processStatusInProcessEntity = await new ProcessStatusDatasourceImpl().getByAbbreviation('WAITING_TO_SEND')
+        if (!processStatusInProcessEntity) throw new Error("Process status not found")
+        const institutionEntity = await new InstitutionDatasourceImpl().getByInstitutionAbbreviationAndModality(gradeReceiverEntity.institutionAbbreviation,gradeReceiverEntity.modality)
+        if (!institutionEntity){
+            console.error("Institution not found")
+        }
+        await new GradeSendingDatasourceImpl().register(gradeReceiverEntity,institutionEntity,processStatusInProcessEntity)
     }
 }

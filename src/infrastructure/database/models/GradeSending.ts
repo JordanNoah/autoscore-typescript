@@ -9,16 +9,16 @@ interface GradeSendingRow {
     uuid: string,
     userId: number,
     courseId: number,
-    contextId: string,
+    contextId: number,
     source: string,
     component: string,
     activityId: number,
     instanceId: number,
     scoreToAssign: number,
-    dateToGrade: string,
-    itemNumber: number,
+    dateToGrade: Date,
+    itemNumber: number|null,
     gradeReceiverId: number,
-    institutionId: number,
+    institutionId: number|null,
     processStatusId: number,
     createdAt?: Date,
     updatedAt?: Date
@@ -29,16 +29,16 @@ export class GradeSendingSequelize extends Model<GradeSendingRow,Omit<GradeSendi
     declare uuid: string
     declare userId: number
     declare courseId: number
-    declare contextId: string
+    declare contextId: number
     declare source: string
     declare component: string
     declare activityId: number
     declare instanceId: number
     declare scoreToAssign: number
-    declare dateToGrade: string
-    declare itemNumber: number
+    declare dateToGrade: Date
+    declare itemNumber: number|null
     declare gradeReceiverId: number
-    declare institutionId: number
+    declare institutionId: number|null
     declare processStatusId: number
     declare readonly createdAt: Date
     declare readonly updatedAt: Date
@@ -64,7 +64,7 @@ GradeSendingSequelize.init({
         allowNull: false
     },
     contextId:{
-        type: DataTypes.TEXT,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     source:{
@@ -93,7 +93,7 @@ GradeSendingSequelize.init({
     },
     itemNumber:{
         type: DataTypes.INTEGER,
-        allowNull:false
+        allowNull:true
     },
     gradeReceiverId:{
         type: DataTypes.INTEGER,
@@ -105,7 +105,7 @@ GradeSendingSequelize.init({
     },
     institutionId:{
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
             model: InstitutionSequelize,
             key: 'id'
