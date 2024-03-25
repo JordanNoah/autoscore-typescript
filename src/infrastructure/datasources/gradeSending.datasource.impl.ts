@@ -11,7 +11,6 @@ import {Op} from "sequelize";
 export class GradeSendingDatasourceImpl implements GradeSendingDatasource {
     async register(gradeReceiverEntity: GradeReceiverEntity, institution: InstitutionEntity|null, processStatusEntity: ProcessStatusEntity): Promise<GradeSendingEntity> {
         try {
-            console.log(gradeReceiverEntity.assigment)
             const [gradeSending, created] = await GradeSendingSequelize.findOrCreate({
                 where:{
                     uuid:gradeReceiverEntity.uuid
