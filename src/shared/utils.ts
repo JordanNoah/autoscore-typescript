@@ -8,12 +8,8 @@ export class Utils {
         let findGrade: GradeItemDto|null = null
         for (let i = 0; i < gradesMoodleResponse.userGrades.length; i++) {
             let element = gradesMoodleResponse.userGrades[i]
-            let gradeItemDto = element.gradeItems.filter((gradeItem) => {
-                return gradeItem.cmId === gradeSendingEntity.activityId && gradeItem.itemName != null
-            })
-            if (gradeItemDto.length>0){
-                findGrade = gradeItemDto[0]
-            }
+            let gradeItemDto = element.gradeItems.find(gradeItem => (gradeItem.cmId === gradeSendingEntity.activityId && gradeItem.itemName != null))
+            findGrade = gradeItemDto || null
         }
         return findGrade
     }

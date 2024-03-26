@@ -4,7 +4,7 @@ export class CronjobEntity {
         public title: string,
         public abbreviation: string,
         public running: boolean,
-        public nextRun: string,
+        public nextRun: number,
         public icon: string,
         public createdAt: Date,
         public updatedAt: Date

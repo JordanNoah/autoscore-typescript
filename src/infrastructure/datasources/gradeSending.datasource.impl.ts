@@ -7,6 +7,8 @@ import {CustomError} from "../../domain/errors/custom.error";
 import {GradeSendingSequelize} from "../database/models/GradeSending";
 import {GradeReceiverSequelize} from "../database/models/GradeReceiver";
 import {Op} from "sequelize";
+import ConstantsSeeder from "../database/seeders/constants.seeder";
+import {ProcessStatusDatasourceImpl} from "./processStatus.datasource.impl";
 
 export class GradeSendingDatasourceImpl implements GradeSendingDatasource {
     async register(gradeReceiverEntity: GradeReceiverEntity, institution: InstitutionEntity|null, processStatusEntity: ProcessStatusEntity): Promise<GradeSendingEntity> {
@@ -44,8 +46,11 @@ export class GradeSendingDatasourceImpl implements GradeSendingDatasource {
 
     async updateStateProcess(gradeSendingEntity: GradeSendingEntity, processStatusEntity: ProcessStatusEntity): Promise<GradeSendingEntity> {
         try {
+            console.log(`${processStatusEntity.process}: ${gradeSendingEntity.uuid}`)
             gradeSendingEntity.processStatusId = processStatusEntity.id
-            await GradeReceiverSequelize.update(gradeSendingEntity,{
+            await GradeSendingSequelize.update({
+                processStatusId:gradeSendingEntity.processStatusId
+            },{
                 where:{
                     id:gradeSendingEntity.id
                 }
@@ -86,6 +91,90 @@ export class GradeSendingDatasourceImpl implements GradeSendingDatasource {
                     }
                 }
             })
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw CustomError.internalSever()
+        }
+    }
+
+    async setMoodleErrorStateProcess(gradeSendingEntity: GradeSendingEntity): Promise<GradeSendingEntity> {
+        try {
+            const processStatus = await new ProcessStatusDatasourceImpl().getByAbbreviation(ConstantsSeeder.processStatus.MOODLE_ERROR)
+            await new GradeSendingDatasourceImpl().updateStateProcess(gradeSendingEntity,processStatus!)
+            gradeSendingEntity.processStatusId = processStatus!.id
+            return gradeSendingEntity
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw CustomError.internalSever()
+        }
+    }
+
+    async setSuccessfulMoodleStateProcess(gradeSendingEntity: GradeSendingEntity): Promise<GradeSendingEntity> {
+        try {
+            const processStatus = await new ProcessStatusDatasourceImpl().getByAbbreviation(ConstantsSeeder.processStatus.SUCCESSFUL_MOODLE)
+            await new GradeSendingDatasourceImpl().updateStateProcess(gradeSendingEntity,processStatus!)
+            gradeSendingEntity.processStatusId = processStatus!.id
+            return gradeSendingEntity
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw CustomError.internalSever()
+        }
+    }
+
+    async setExistingGradeStateProcess(gradeSendingEntity: GradeSendingEntity): Promise<GradeSendingEntity> {
+        try {
+            const processStatus = await new ProcessStatusDatasourceImpl().getByAbbreviation(ConstantsSeeder.processStatus.EXISTING_GRADE)
+            await new GradeSendingDatasourceImpl().updateStateProcess(gradeSendingEntity,processStatus!)
+            gradeSendingEntity.processStatusId = processStatus!.id
+            return gradeSendingEntity
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw CustomError.internalSever()
+        }
+    }
+
+    async setInProcessStateProcess(gradeSendingEntity: GradeSendingEntity): Promise<GradeSendingEntity> {
+        try {
+            const processStatus = await new ProcessStatusDatasourceImpl().getByAbbreviation(ConstantsSeeder.processStatus.PROCESSING)
+            await new GradeSendingDatasourceImpl().updateStateProcess(gradeSendingEntity,processStatus!)
+            gradeSendingEntity.processStatusId = processStatus!.id
+            return gradeSendingEntity
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw CustomError.internalSever()
+        }
+    }
+
+    async setInstitutionNotFoundStateProcess(gradeSendingEntity: GradeSendingEntity): Promise<GradeSendingEntity> {
+        try {
+            const processStatus = await new ProcessStatusDatasourceImpl().getByAbbreviation(ConstantsSeeder.processStatus.INSTITUTION_NOT_FOUND)
+            await new GradeSendingDatasourceImpl().updateStateProcess(gradeSendingEntity,processStatus!)
+            gradeSendingEntity.processStatusId = processStatus!.id
+            return gradeSendingEntity
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw CustomError.internalSever()
+        }
+    }
+
+    async setUserNotFound(gradeSendingEntity: GradeSendingEntity): Promise<GradeSendingEntity> {
+        try {
+            const processStatus = await new ProcessStatusDatasourceImpl().getByAbbreviation(ConstantsSeeder.processStatus.USER_NOT_FOUND)
+            await new GradeSendingDatasourceImpl().updateStateProcess(gradeSendingEntity,processStatus!)
+            gradeSendingEntity.processStatusId = processStatus!.id
+            return gradeSendingEntity
         } catch (error) {
             if (error instanceof CustomError) {
                 throw error;

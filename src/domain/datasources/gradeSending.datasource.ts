@@ -9,6 +9,12 @@ export abstract class GradeSendingDatasource {
                       processStatusEntity:ProcessStatusEntity): Promise<GradeSendingEntity>
     abstract updateStateProcess(gradeSendingEntity:GradeSendingEntity,
                                 processStatusEntity:ProcessStatusEntity): Promise<GradeSendingEntity>
+    abstract setMoodleErrorStateProcess(gradeSendingEntity:GradeSendingEntity): Promise<GradeSendingEntity>
+    abstract setSuccessfulMoodleStateProcess(gradeSendingEntity:GradeSendingEntity): Promise<GradeSendingEntity>
+    abstract setInProcessStateProcess(gradeSendingEntity:GradeSendingEntity): Promise<GradeSendingEntity>
+    abstract setInstitutionNotFoundStateProcess(gradeSendingEntity:GradeSendingEntity): Promise<GradeSendingEntity>
+    abstract setExistingGradeStateProcess(gradeSendingEntity:GradeSendingEntity): Promise<GradeSendingEntity>
+    abstract setUserNotFound(gradeSendingEntity:GradeSendingEntity): Promise<GradeSendingEntity>
     abstract getById(id:number): Promise<GradeSendingEntity|null>
     abstract getSyncAutoScore(processStatus:ProcessStatusEntity): Promise<GradeSendingEntity[]>
 }

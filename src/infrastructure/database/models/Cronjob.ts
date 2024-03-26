@@ -6,7 +6,7 @@ interface CronJobRow {
     title: string,
     abbreviation: string,
     running: boolean,
-    nextRun: string,
+    nextRun: number,
     icon: string,
     createdAt?: Date,
     updatedAt?: Date
@@ -17,7 +17,7 @@ export class CronJobSequelize extends Model<CronJobRow,Omit<CronJobRow, 'id'>> {
     declare title: string
     declare abbreviation: string
     declare running: boolean
-    declare nextRun: string
+    declare nextRun: number
     declare icon: string
     declare readonly createdAt: Date
     declare readonly updatedAt: Date
@@ -43,7 +43,7 @@ CronJobSequelize.init({
         allowNull: false
     },
     nextRun:{
-        type: DataTypes.TEXT,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     icon:{

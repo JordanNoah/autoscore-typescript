@@ -61,6 +61,7 @@ export class ExternalApiRepository {
     }
 
     public async core_grades_grader_gradingpanel_point_store(gradeSendingEntity: GradeSendingEntity): Promise<any> {
+        console.log(gradeSendingEntity.contextId)
         return await this.axios.post({
             'wstoken':this.institution.token,
             'wsfunction':'core_grades_grader_gradingpanel_point_store',
