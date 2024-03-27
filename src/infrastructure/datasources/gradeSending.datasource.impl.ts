@@ -182,4 +182,39 @@ export class GradeSendingDatasourceImpl implements GradeSendingDatasource {
             throw CustomError.internalSever()
         }
     }
+    async getCleanerAutoScore(): Promise<GradeSendingEntity[]> {
+        try {
+            const processStatus = await new ProcessStatusDatasourceImpl().getCleanerStatus()
+            const arrayIdStatus = processStatus.map(e => e.id)
+            return await GradeSendingSequelize.findAll({
+                where:{
+                    processStatusId:{
+                        [Op.in]:arrayIdStatus
+                    }
+                }
+            })
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw CustomError.internalSever()
+        }
+    }
+
+    async deleteByGroupsIds(ids: number[]): Promise<void> {
+        try {
+            await GradeSendingSequelize.destroy({
+                where:{
+                    id:{
+                        [Op.in]:ids
+                    }
+                }
+            })
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw CustomError.internalSever()
+        }
+    }
 }

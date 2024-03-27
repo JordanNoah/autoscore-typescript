@@ -8,6 +8,7 @@ import {GradeSendingEntity} from "../../domain/entities/gradeSending.entity";
 import {InstitutionEntity} from "../../domain/entities/institution.entity";
 import {CronjobDatasourceImpl} from "../datasources/cronjob.datasource.impl";
 import ConstantsSeeder from "../database/seeders/constants.seeder";
+import {GradeReceiverDatasourceImpl} from "../datasources/gradeReceiver.datasource.impl";
 
 export class CronProcess {
     async autoScoreCronJob () {
@@ -83,6 +84,30 @@ export class CronProcess {
             }else{
                 await new GradeSendingDatasourceImpl().setMoodleErrorStateProcess(gradeSendingEntity)
             }
+        }
+    }
+
+    async autoScoreCleaner() {
+        try {
+            const cronjob = await new CronjobDatasourceImpl().getCronByAbbreviation('CLEANER')
+
+            if (cronjob){
+                if (cronjob.running){
+                    console.log("---- cronjob autoscore cleaner starting ----")
+                    const gradesSendingToRemove = await new GradeSendingDatasourceImpl().getCleanerAutoScore()
+                    const arraysIdGradeSending = gradesSendingToRemove.map(e=> e.id)
+                    const arraysIdGradeReceiver = gradesSendingToRemove.map(e => e.gradeReceiverId)
+
+                    await new GradeSendingDatasourceImpl().deleteByGroupsIds(arraysIdGradeSending)
+                    await new GradeReceiverDatasourceImpl().deleteByGroupsIds(arraysIdGradeReceiver)
+                    await new CronjobDatasourceImpl().setNotRunningCronByAbbreviation('CLEANER')
+                    console.log("---- cronjob autoscore cleaner stopped ----")
+                }
+            }
+            await new CronjobDatasourceImpl().
+            await new CronjobDatasourceImpl()
+        } catch (e) {
+            console.log(e)
         }
     }
 }

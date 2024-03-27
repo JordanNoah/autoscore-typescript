@@ -16,7 +16,7 @@ export class Cron {
 
     cleaner() {
         cron.schedule(AppConfig.CRONJOB_CLEANER, async () => {
-            console.log("cronjob cleaner")
+            await new CronProcess().autoScoreCleaner()
         })
     }
 }

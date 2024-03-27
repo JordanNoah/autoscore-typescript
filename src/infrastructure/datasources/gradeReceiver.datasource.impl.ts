@@ -4,6 +4,7 @@ import {GradeReceiverEntity} from "../../domain/entities/gradeReceiver.entity";
 import {AssigmentEntity} from "../../domain/entities/assigment.entity"
 import {CustomError} from "../../domain/errors/custom.error";
 import {GradeReceiverSequelize} from "../database/models/GradeReceiver";
+import {Op} from "sequelize";
 
 export class GradeReceiverDatasourceImpl implements GradeReceiverDatasource {
     async register(gradeReceiverRegisterDto:GradeReceiverRegisterDto): Promise<GradeReceiverEntity> {
@@ -33,6 +34,23 @@ export class GradeReceiverDatasourceImpl implements GradeReceiverDatasource {
                 gradeReceiver.createdAt,
                 gradeReceiver.updatedAt
             )
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw CustomError.internalSever()
+        }
+    }
+
+    async deleteByGroupsIds(ids: number[]): Promise<void> {
+        try {
+            await GradeReceiverSequelize.destroy({
+                where:{
+                    id:{
+                        [Op.in]:ids
+                    }
+                }
+            })
         } catch (error) {
             if (error instanceof CustomError) {
                 throw error;

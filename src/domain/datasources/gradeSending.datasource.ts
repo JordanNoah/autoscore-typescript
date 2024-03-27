@@ -17,4 +17,6 @@ export abstract class GradeSendingDatasource {
     abstract setUserNotFound(gradeSendingEntity:GradeSendingEntity): Promise<GradeSendingEntity>
     abstract getById(id:number): Promise<GradeSendingEntity|null>
     abstract getSyncAutoScore(processStatus:ProcessStatusEntity): Promise<GradeSendingEntity[]>
+    abstract getCleanerAutoScore(): Promise<GradeSendingEntity[]>
+    abstract deleteByGroupsIds(ids:number[]): Promise<void>
 }
