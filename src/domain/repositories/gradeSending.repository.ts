@@ -1,9 +1,9 @@
-import {GradeSendingEntity} from "../entities/gradeSending.entity";
 import {GradeReceiverEntity} from "../entities/gradeReceiver.entity";
 import {InstitutionEntity} from "../entities/institution.entity";
 import {ProcessStatusEntity} from "../entities/processStatus.entity";
+import {GradeSendingEntity} from "../entities/gradeSending.entity";
 
-export abstract class GradeSendingDatasource {
+export abstract class GradeSendingRepository {
     abstract register(gradeReceiverEntity:GradeReceiverEntity,
                       institution:InstitutionEntity,
                       processStatusEntity:ProcessStatusEntity): Promise<GradeSendingEntity>

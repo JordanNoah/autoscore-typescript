@@ -2,10 +2,11 @@ import {Server} from "./presentation/server"
 import AppConfig from './domain/config'
 import {AppRoutes} from "./presentation/routes"
 
-(() => {
-    main()
+(async () => {
+    await main()
 })()
 
-function main() {
-    new Server({port:AppConfig.PORT,routes:AppRoutes.routes}).start()
+async function main() {
+    const server = new Server({port:AppConfig.PORT,routes:AppRoutes.routes})
+    await server.start()
 }

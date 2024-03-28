@@ -20,8 +20,9 @@ export class Server {
         this.routes = routes
     }
 
-    public start() {
-        DbSequelize().then(async ()=> {
+    public async start() {
+        try {
+            await DbSequelize()
             await Rabbitmq.init()
             new Cron().userNotFound()
             new Cron().processWaitingToSend()
@@ -32,8 +33,8 @@ export class Server {
             server.listen(this.port,()=> {
                 console.log(`Server running on PORT: ${this.port}`)
             })
-        }).catch((err) => {
-            console.error(err)
-        })
+        }catch (error) {
+            console.error(error)
+        }
     }
 }

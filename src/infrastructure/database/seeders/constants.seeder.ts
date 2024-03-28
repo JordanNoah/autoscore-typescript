@@ -10,6 +10,11 @@ const Constants = {
         PROCESSING:'PROCESSING',
         USER_NOT_FOUND:'USER_NOT_FOUND',
         INSTITUTION_NOT_FOUND:'INSTITUTION_NOT_FOUND'
+    },
+    cronjob:{
+        AUTOSCORE:'AUTOSCORE',
+        CLEANER: 'CLEANER',
+        USERNOTFOUND: 'USERNOTFOUND'
     }
 }
 

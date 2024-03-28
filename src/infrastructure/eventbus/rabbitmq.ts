@@ -8,43 +8,55 @@ export class Rabbitmq {
     private static _channel: Channel
 
     public static async connection() {
-        this._connection = await connect(config)
-        this._channel = await this._connection.createConfirmChannel()
+        try {
+            this._connection = await connect(config)
+            this._channel = await this._connection.createConfirmChannel()
+        }catch (e) {
+            console.log(e)
+        }
     }
 
     public static async setQueue() {
-        await this._channel.assertQueue(
-            AppConfig.RABBIT_QUEUE,
-            assertQueue
-        )
+        if (this._channel){
+            await this._channel.assertQueue(
+                AppConfig.RABBIT_QUEUE,
+                assertQueue
+            )
 
-        await this._channel.assertExchange(
-            AppConfig.RABBIT_EXCHANGE,
-            AppConfig.RABBIT_TYPE_EXCHANGE,
-            assertExchange
-        )
+            await this._channel.assertExchange(
+                AppConfig.RABBIT_EXCHANGE,
+                AppConfig.RABBIT_TYPE_EXCHANGE,
+                assertExchange
+            )
 
-        await this._channel.bindQueue(
-            AppConfig.RABBIT_QUEUE,
-            AppConfig.RABBIT_EXCHANGE,
-            AppConfig.RABBIT_ROUTING_KEY
-        )
+            await this._channel.bindQueue(
+                AppConfig.RABBIT_QUEUE,
+                AppConfig.RABBIT_EXCHANGE,
+                AppConfig.RABBIT_ROUTING_KEY
+            )
 
-        await this._channel.prefetch(Number(AppConfig.RABBIT_PREFETCH))
+            await this._channel.prefetch(Number(AppConfig.RABBIT_PREFETCH))
+        } else {
+            console.log("Channel not found")
+        }
     }
 
     public static async consume() {
-        await this._channel.consume(
-            AppConfig.RABBIT_QUEUE,
-            async (msg) => {
-                try {
-                    const [error,eventDto] = EventDto.create(msg!)
-                    await this.messageProcessor(eventDto!)
-                } catch (error) {
-                    console.log(error)
+        if (this._channel){
+            await this._channel.consume(
+                AppConfig.RABBIT_QUEUE,
+                async (msg) => {
+                    try {
+                        const [error,eventDto] = EventDto.create(msg!)
+                        await this.messageProcessor(eventDto!)
+                    } catch (error) {
+                        console.log(error)
+                    }
                 }
-            }
-        )
+            )
+        }else{
+            console.log("Channel not found")
+        }
     }
 
     private static async messageProcessor(msg: EventDto) {

@@ -217,4 +217,23 @@ export class GradeSendingDatasourceImpl implements GradeSendingDatasource {
             throw CustomError.internalSever()
         }
     }
+
+    async getUserNotFound(): Promise<GradeSendingEntity[]> {
+        try {
+            const processUserNotFound = await new ProcessStatusDatasourceImpl().getByAbbreviation(ConstantsSeeder.processStatus.USER_NOT_FOUND)
+            return await GradeSendingSequelize.findAll({
+                where:{
+                    processStatusId: processUserNotFound!.id,
+                    dateToGrade:{
+                        [Op.lte]: new Date().toISOString()
+                    }
+                }
+            })
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw CustomError.internalSever()
+        }
+    }
 }

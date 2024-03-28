@@ -9,11 +9,12 @@ import {InstitutionEntity} from "../../domain/entities/institution.entity";
 import {CronjobDatasourceImpl} from "../datasources/cronjob.datasource.impl";
 import ConstantsSeeder from "../database/seeders/constants.seeder";
 import {GradeReceiverDatasourceImpl} from "../datasources/gradeReceiver.datasource.impl";
+import Constants from "../database/seeders/constants.seeder";
 
 export class CronProcess {
     async autoScoreCronJob () {
         try {
-            const cronjob = await new CronjobDatasourceImpl().getCronByAbbreviation('AUTOSCORE')
+            const cronjob = await new CronjobDatasourceImpl().getCronByAbbreviation(Constants.cronjob.AUTOSCORE)
 
             if (cronjob){
                 if(!cronjob.running){
@@ -27,34 +28,12 @@ export class CronProcess {
 
                     if (gradeSending.length > 0) {
                         console.log(`Found total of rows: ${gradeSending.length}`)
-                        await new CronjobDatasourceImpl().setRunningCronByAbbreviation('AUTOSCORE')
+                        await new CronjobDatasourceImpl().setRunningCronByAbbreviation(cronjob.abbreviation)
                         for (let i = 0; i < gradeSending.length; i++) {
                             let element = gradeSending[i]
-                            await new GradeSendingDatasourceImpl().setInProcessStateProcess(element)
-                            const campus = await new InstitutionDatasourceImpl().getById(element.institutionId!)
-                            if (!campus){
-                                await new GradeSendingDatasourceImpl().setInstitutionNotFoundStateProcess(element)
-                            }else{
-                                let externalApiRepository = new ExternalApiRepository(campus)
-
-                                let grades = await externalApiRepository.gradereport_user_get_grade_items(element)
-                                let [errorGradeResponse,gradesResponseMoodle] = GradeResponseDto.create(grades)
-                                let gradesMoodle = new Utils().hasGrades(gradesResponseMoodle!,element)
-                                let userEnrolledMoodle = await externalApiRepository.core_enrol_get_users_courses(element)
-                                let userIsEnrolled = new Utils().isEnrolled(userEnrolledMoodle,element)
-                                if (!userIsEnrolled) await new GradeSendingDatasourceImpl().setUserNotFound(element)
-                                if (gradesMoodle && userIsEnrolled){
-                                    if (!gradesMoodle.gradeRaw){
-                                        await this.sendGrade(element,campus)
-                                    }else{
-                                        await new GradeSendingDatasourceImpl().setExistingGradeStateProcess(element)
-                                    }
-                                }else if (!gradesMoodle && userIsEnrolled){
-                                    await this.sendGrade(element,campus)
-                                }
-                            }
+                            await this.startProcessToMoodleByGradeSending(element)
                         }
-                        await new CronjobDatasourceImpl().setNotRunningCronByAbbreviation('AUTOSCORE')
+                        await new CronjobDatasourceImpl().setNotRunningCronByAbbreviation(cronjob.abbreviation)
                         console.log("---- cronjob auto score finish ----")
                     } else {
                         console.log("Nothing found to synchronize, ending the auto score cronjob")
@@ -89,10 +68,11 @@ export class CronProcess {
 
     async autoScoreCleaner() {
         try {
-            const cronjob = await new CronjobDatasourceImpl().getCronByAbbreviation('CLEANER')
+            const cronjob = await new CronjobDatasourceImpl().getCronByAbbreviation(Constants.cronjob.CLEANER)
 
             if (cronjob){
-                if (cronjob.running){
+                if (!cronjob.running){
+                    await new CronjobDatasourceImpl().setRunningCronByAbbreviation(cronjob.abbreviation)
                     console.log("---- cronjob autoscore cleaner starting ----")
                     const gradesSendingToRemove = await new GradeSendingDatasourceImpl().getCleanerAutoScore()
                     const arraysIdGradeSending = gradesSendingToRemove.map(e=> e.id)
@@ -100,14 +80,70 @@ export class CronProcess {
 
                     await new GradeSendingDatasourceImpl().deleteByGroupsIds(arraysIdGradeSending)
                     await new GradeReceiverDatasourceImpl().deleteByGroupsIds(arraysIdGradeReceiver)
-                    await new CronjobDatasourceImpl().setNotRunningCronByAbbreviation('CLEANER')
+                    await new CronjobDatasourceImpl().setNotRunningCronByAbbreviation(cronjob.abbreviation)
                     console.log("---- cronjob autoscore cleaner stopped ----")
                 }
             }
-            await new CronjobDatasourceImpl().
-            await new CronjobDatasourceImpl()
         } catch (e) {
             console.log(e)
+        }
+    }
+
+    async autoScoreUserNotFound() {
+        try {
+            const cronjob = await new CronjobDatasourceImpl().getCronByAbbreviation(Constants.cronjob.USERNOTFOUND)
+
+            if (cronjob){
+                if (!cronjob.running){
+                    await new CronjobDatasourceImpl().setRunningCronByAbbreviation(cronjob.abbreviation)
+                    console.log("---- cronjob autoscore usernotfound starting ----")
+
+                    const gradeSending = await new GradeSendingDatasourceImpl().getUserNotFound()
+
+                    if (gradeSending.length > 0) {
+                        console.log(`Found total of rows: ${gradeSending.length}`)
+                        for (let i = 0; i <gradeSending.length; i++){
+                            const element = gradeSending[i];
+                            await this.startProcessToMoodleByGradeSending(element)
+                        }
+                    }
+
+                    await new CronjobDatasourceImpl().setNotRunningCronByAbbreviation(cronjob.abbreviation)
+                    console.log("---- cronjob autoscore usernotfound stopped ----")
+                }
+            }
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    async startProcessToMoodleByGradeSending(gradeSending: GradeSendingEntity):Promise<void>{
+        try {
+            await new GradeSendingDatasourceImpl().setInProcessStateProcess(gradeSending)
+            const campus = await new InstitutionDatasourceImpl().getById(gradeSending.institutionId!)
+            if (!campus){
+                await new GradeSendingDatasourceImpl().setInstitutionNotFoundStateProcess(gradeSending)
+            }else{
+                let externalApiRepository = new ExternalApiRepository(campus)
+
+                let grades = await externalApiRepository.gradereport_user_get_grade_items(gradeSending)
+                let [errorGradeResponse,gradesResponseMoodle] = GradeResponseDto.create(grades)
+                let gradesMoodle = new Utils().hasGrades(gradesResponseMoodle!,gradeSending)
+                let userEnrolledMoodle = await externalApiRepository.core_enrol_get_users_courses(gradeSending)
+                let userIsEnrolled = new Utils().isEnrolled(userEnrolledMoodle,gradeSending)
+                if (!userIsEnrolled) await new GradeSendingDatasourceImpl().setUserNotFound(gradeSending)
+                if (gradesMoodle && userIsEnrolled){
+                    if (!gradesMoodle.gradeRaw){
+                        await this.sendGrade(gradeSending,campus)
+                    }else{
+                        await new GradeSendingDatasourceImpl().setExistingGradeStateProcess(gradeSending)
+                    }
+                }else if (!gradesMoodle && userIsEnrolled){
+                    await this.sendGrade(gradeSending,campus)
+                }
+            }
+        } catch (error) {
+            console.error(error)
         }
     }
 }

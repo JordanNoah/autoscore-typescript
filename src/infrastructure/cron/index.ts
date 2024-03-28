@@ -4,7 +4,7 @@ import {CronProcess} from "./process";
 export class Cron {
     userNotFound() {
         cron.schedule(AppConfig.CRONJOB_USER_NOT_FOUND, async () => {
-            console.log("user not found")
+            await new CronProcess().autoScoreUserNotFound()
         })
     }
 
